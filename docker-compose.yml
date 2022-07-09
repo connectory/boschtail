@@ -9,12 +9,10 @@ services:
       - db
     environment:
       profile: prod
-      db_pass: pass
   db:
-    image: postgres:9.6.21-alpine
+    image: mongo:4.4.5
+    container_name: db
     environment:
-      POSTGRES_PASSWORD: pass
-      POSTGRES_USER: goxygen
-      POSTGRES_DB: goxygen
+      MONGO_INITDB_DATABASE: tech
     volumes:
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init-db.js:/docker-entrypoint-initdb.d/init.js

@@ -1,34 +1,35 @@
 package main
 
 import (
-	"boschtail/db"
-	"boschtail/web"
-	"database/sql"
-	_ "github.com/lib/pq"
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"os"
+	"boschtail/db"
+	"boschtail/web"
 )
 
 func main() {
-	d, err := sql.Open("postgres", dataSource())
+	client, err := mongo.Connect(context.TODO(), clientOptions())
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer d.Close()
+	defer client.Disconnect(context.TODO())
+	mongoDB := db.NewMongo(client)
 	// CORS is enabled only in prod profile
 	cors := os.Getenv("profile") == "prod"
-	app := web.NewApp(db.NewDB(d), cors)
+	app := web.NewApp(mongoDB, cors)
 	err = app.Serve()
 	log.Println("Error", err)
 }
 
-func dataSource() string {
-	host := "localhost"
-	pass := "pass"
-	if os.Getenv("profile") == "prod" {
-		host = "db"
-		pass = os.Getenv("db_pass")
+func clientOptions() *options.ClientOptions {
+	host := "db"
+	if os.Getenv("profile") != "prod" {
+		host = "localhost"
 	}
-	return "postgresql://" + host + ":5432/goxygen" +
-		"?user=goxygen&sslmode=disable&password=" + pass
+	return options.Client().ApplyURI(
+		"mongodb://" + host + ":27017",
+	)
 }

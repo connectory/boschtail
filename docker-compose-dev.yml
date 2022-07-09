@@ -1,12 +1,10 @@
 version: "3.7"
 services:
   dev_db:
-    image: postgres:9.6.21-alpine
+    image: mongo:4.4.5
     environment:
-      POSTGRES_PASSWORD: pass
-      POSTGRES_USER: goxygen
-      POSTGRES_DB: goxygen
+      MONGO_INITDB_DATABASE: tech
     ports:
-      - 5432:5432
+      - 27017:27017
     volumes:
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init-db.js:/docker-entrypoint-initdb.d/init.js
