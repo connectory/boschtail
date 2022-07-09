@@ -56,3 +56,31 @@ docker-compose up
 ```
 This will build the application and start it together with
 its database. Access the application on http://localhost:8080.
+
+## Data model
+
+mixer
+- id
+- mixer_config_id
+
+mixer_config
+- list of ingredient (ordered)
+
+order
+- id
+- recipe_id
+- mixer_id (calculated)
+
+recipe
+- id
+- list of recipe_ingredient
+
+recipe_ingredient
+- id
+- ingredient_id
+- amount
+
+ingredient
+- id
+- name
+
