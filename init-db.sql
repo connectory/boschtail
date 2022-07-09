@@ -11,3 +11,6 @@ insert into technologies values (
 insert into technologies values (
   'PostgreSQL', 'A powerful, open source object-relational database system'
 );
+insert into technologies values (
+  'foo', 'A powerful, open source object-relational foo system'
+);
