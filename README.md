@@ -18,6 +18,7 @@ classDiagram
 
     Mixer : +int id
     MixerConfig : +int id
+    MixerConfig : +List<Ingredient> ingredients
     Order : +int id
     Recipe : +int id
     Recipe : +int name
