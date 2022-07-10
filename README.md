@@ -8,7 +8,7 @@ generated with [ent](https://entgo.io/)
 ## Data model
 
 > IN PROGRESS
-better write proper datamodel in [](https://mermaid-js.github.io/mermaid/#/classDiagram)
+better write proper datamodel, e.g. in [mermaid](https://mermaid-js.github.io/mermaid/#/classDiagram)
 
 mixer
 - id
