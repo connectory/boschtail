@@ -6,5 +6,23 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Ingredient is the predicate function for ingredient builders.
+type Ingredient func(*sql.Selector)
+
+// Mixer is the predicate function for mixer builders.
+type Mixer func(*sql.Selector)
+
+// MixerConfig is the predicate function for mixerconfig builders.
+type MixerConfig func(*sql.Selector)
+
+// Order is the predicate function for order builders.
+type Order func(*sql.Selector)
+
+// Recipe is the predicate function for recipe builders.
+type Recipe func(*sql.Selector)
+
+// RecipeIngredient is the predicate function for recipeingredient builders.
+type RecipeIngredient func(*sql.Selector)
+
 // Todo is the predicate function for todo builders.
 type Todo func(*sql.Selector)

@@ -8,6 +8,84 @@ import (
 	"fmt"
 )
 
+// The IngredientFunc type is an adapter to allow the use of ordinary
+// function as Ingredient mutator.
+type IngredientFunc func(context.Context, *ent.IngredientMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f IngredientFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.IngredientMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IngredientMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The MixerFunc type is an adapter to allow the use of ordinary
+// function as Mixer mutator.
+type MixerFunc func(context.Context, *ent.MixerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MixerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.MixerMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MixerMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The MixerConfigFunc type is an adapter to allow the use of ordinary
+// function as MixerConfig mutator.
+type MixerConfigFunc func(context.Context, *ent.MixerConfigMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MixerConfigFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.MixerConfigMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MixerConfigMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The OrderFunc type is an adapter to allow the use of ordinary
+// function as Order mutator.
+type OrderFunc func(context.Context, *ent.OrderMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OrderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.OrderMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OrderMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The RecipeFunc type is an adapter to allow the use of ordinary
+// function as Recipe mutator.
+type RecipeFunc func(context.Context, *ent.RecipeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RecipeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.RecipeMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RecipeMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The RecipeIngredientFunc type is an adapter to allow the use of ordinary
+// function as RecipeIngredient mutator.
+type RecipeIngredientFunc func(context.Context, *ent.RecipeIngredientMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RecipeIngredientFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.RecipeIngredientMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RecipeIngredientMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The TodoFunc type is an adapter to allow the use of ordinary
 // function as Todo mutator.
 type TodoFunc func(context.Context, *ent.TodoMutation) (ent.Value, error)

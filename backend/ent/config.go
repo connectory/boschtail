@@ -24,7 +24,13 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	Todo []ent.Hook
+	Ingredient       []ent.Hook
+	Mixer            []ent.Hook
+	MixerConfig      []ent.Hook
+	Order            []ent.Hook
+	Recipe           []ent.Hook
+	RecipeIngredient []ent.Hook
+	Todo             []ent.Hook
 }
 
 // Options applies the options on the config object.

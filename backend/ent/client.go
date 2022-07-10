@@ -9,6 +9,12 @@ import (
 
 	"boschtail/ent/migrate"
 
+	"boschtail/ent/ingredient"
+	"boschtail/ent/mixer"
+	"boschtail/ent/mixerconfig"
+	"boschtail/ent/order"
+	"boschtail/ent/recipe"
+	"boschtail/ent/recipeingredient"
 	"boschtail/ent/todo"
 
 	"entgo.io/ent/dialect"
@@ -20,6 +26,18 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Ingredient is the client for interacting with the Ingredient builders.
+	Ingredient *IngredientClient
+	// Mixer is the client for interacting with the Mixer builders.
+	Mixer *MixerClient
+	// MixerConfig is the client for interacting with the MixerConfig builders.
+	MixerConfig *MixerConfigClient
+	// Order is the client for interacting with the Order builders.
+	Order *OrderClient
+	// Recipe is the client for interacting with the Recipe builders.
+	Recipe *RecipeClient
+	// RecipeIngredient is the client for interacting with the RecipeIngredient builders.
+	RecipeIngredient *RecipeIngredientClient
 	// Todo is the client for interacting with the Todo builders.
 	Todo *TodoClient
 }
@@ -35,6 +53,12 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Ingredient = NewIngredientClient(c.config)
+	c.Mixer = NewMixerClient(c.config)
+	c.MixerConfig = NewMixerConfigClient(c.config)
+	c.Order = NewOrderClient(c.config)
+	c.Recipe = NewRecipeClient(c.config)
+	c.RecipeIngredient = NewRecipeIngredientClient(c.config)
 	c.Todo = NewTodoClient(c.config)
 }
 
@@ -67,9 +91,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Todo:   NewTodoClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Ingredient:       NewIngredientClient(cfg),
+		Mixer:            NewMixerClient(cfg),
+		MixerConfig:      NewMixerConfigClient(cfg),
+		Order:            NewOrderClient(cfg),
+		Recipe:           NewRecipeClient(cfg),
+		RecipeIngredient: NewRecipeIngredientClient(cfg),
+		Todo:             NewTodoClient(cfg),
 	}, nil
 }
 
@@ -87,16 +117,22 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Todo:   NewTodoClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Ingredient:       NewIngredientClient(cfg),
+		Mixer:            NewMixerClient(cfg),
+		MixerConfig:      NewMixerConfigClient(cfg),
+		Order:            NewOrderClient(cfg),
+		Recipe:           NewRecipeClient(cfg),
+		RecipeIngredient: NewRecipeIngredientClient(cfg),
+		Todo:             NewTodoClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Todo.
+//		Ingredient.
 //		Query().
 //		Count(ctx)
 //
@@ -119,7 +155,553 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Ingredient.Use(hooks...)
+	c.Mixer.Use(hooks...)
+	c.MixerConfig.Use(hooks...)
+	c.Order.Use(hooks...)
+	c.Recipe.Use(hooks...)
+	c.RecipeIngredient.Use(hooks...)
 	c.Todo.Use(hooks...)
+}
+
+// IngredientClient is a client for the Ingredient schema.
+type IngredientClient struct {
+	config
+}
+
+// NewIngredientClient returns a client for the Ingredient from the given config.
+func NewIngredientClient(c config) *IngredientClient {
+	return &IngredientClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `ingredient.Hooks(f(g(h())))`.
+func (c *IngredientClient) Use(hooks ...Hook) {
+	c.hooks.Ingredient = append(c.hooks.Ingredient, hooks...)
+}
+
+// Create returns a create builder for Ingredient.
+func (c *IngredientClient) Create() *IngredientCreate {
+	mutation := newIngredientMutation(c.config, OpCreate)
+	return &IngredientCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Ingredient entities.
+func (c *IngredientClient) CreateBulk(builders ...*IngredientCreate) *IngredientCreateBulk {
+	return &IngredientCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Ingredient.
+func (c *IngredientClient) Update() *IngredientUpdate {
+	mutation := newIngredientMutation(c.config, OpUpdate)
+	return &IngredientUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *IngredientClient) UpdateOne(i *Ingredient) *IngredientUpdateOne {
+	mutation := newIngredientMutation(c.config, OpUpdateOne, withIngredient(i))
+	return &IngredientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *IngredientClient) UpdateOneID(id int) *IngredientUpdateOne {
+	mutation := newIngredientMutation(c.config, OpUpdateOne, withIngredientID(id))
+	return &IngredientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Ingredient.
+func (c *IngredientClient) Delete() *IngredientDelete {
+	mutation := newIngredientMutation(c.config, OpDelete)
+	return &IngredientDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *IngredientClient) DeleteOne(i *Ingredient) *IngredientDeleteOne {
+	return c.DeleteOneID(i.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *IngredientClient) DeleteOneID(id int) *IngredientDeleteOne {
+	builder := c.Delete().Where(ingredient.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &IngredientDeleteOne{builder}
+}
+
+// Query returns a query builder for Ingredient.
+func (c *IngredientClient) Query() *IngredientQuery {
+	return &IngredientQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Ingredient entity by its id.
+func (c *IngredientClient) Get(ctx context.Context, id int) (*Ingredient, error) {
+	return c.Query().Where(ingredient.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *IngredientClient) GetX(ctx context.Context, id int) *Ingredient {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *IngredientClient) Hooks() []Hook {
+	return c.hooks.Ingredient
+}
+
+// MixerClient is a client for the Mixer schema.
+type MixerClient struct {
+	config
+}
+
+// NewMixerClient returns a client for the Mixer from the given config.
+func NewMixerClient(c config) *MixerClient {
+	return &MixerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `mixer.Hooks(f(g(h())))`.
+func (c *MixerClient) Use(hooks ...Hook) {
+	c.hooks.Mixer = append(c.hooks.Mixer, hooks...)
+}
+
+// Create returns a create builder for Mixer.
+func (c *MixerClient) Create() *MixerCreate {
+	mutation := newMixerMutation(c.config, OpCreate)
+	return &MixerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Mixer entities.
+func (c *MixerClient) CreateBulk(builders ...*MixerCreate) *MixerCreateBulk {
+	return &MixerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Mixer.
+func (c *MixerClient) Update() *MixerUpdate {
+	mutation := newMixerMutation(c.config, OpUpdate)
+	return &MixerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MixerClient) UpdateOne(m *Mixer) *MixerUpdateOne {
+	mutation := newMixerMutation(c.config, OpUpdateOne, withMixer(m))
+	return &MixerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MixerClient) UpdateOneID(id int) *MixerUpdateOne {
+	mutation := newMixerMutation(c.config, OpUpdateOne, withMixerID(id))
+	return &MixerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Mixer.
+func (c *MixerClient) Delete() *MixerDelete {
+	mutation := newMixerMutation(c.config, OpDelete)
+	return &MixerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MixerClient) DeleteOne(m *Mixer) *MixerDeleteOne {
+	return c.DeleteOneID(m.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MixerClient) DeleteOneID(id int) *MixerDeleteOne {
+	builder := c.Delete().Where(mixer.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MixerDeleteOne{builder}
+}
+
+// Query returns a query builder for Mixer.
+func (c *MixerClient) Query() *MixerQuery {
+	return &MixerQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Mixer entity by its id.
+func (c *MixerClient) Get(ctx context.Context, id int) (*Mixer, error) {
+	return c.Query().Where(mixer.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MixerClient) GetX(ctx context.Context, id int) *Mixer {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MixerClient) Hooks() []Hook {
+	return c.hooks.Mixer
+}
+
+// MixerConfigClient is a client for the MixerConfig schema.
+type MixerConfigClient struct {
+	config
+}
+
+// NewMixerConfigClient returns a client for the MixerConfig from the given config.
+func NewMixerConfigClient(c config) *MixerConfigClient {
+	return &MixerConfigClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `mixerconfig.Hooks(f(g(h())))`.
+func (c *MixerConfigClient) Use(hooks ...Hook) {
+	c.hooks.MixerConfig = append(c.hooks.MixerConfig, hooks...)
+}
+
+// Create returns a create builder for MixerConfig.
+func (c *MixerConfigClient) Create() *MixerConfigCreate {
+	mutation := newMixerConfigMutation(c.config, OpCreate)
+	return &MixerConfigCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MixerConfig entities.
+func (c *MixerConfigClient) CreateBulk(builders ...*MixerConfigCreate) *MixerConfigCreateBulk {
+	return &MixerConfigCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MixerConfig.
+func (c *MixerConfigClient) Update() *MixerConfigUpdate {
+	mutation := newMixerConfigMutation(c.config, OpUpdate)
+	return &MixerConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MixerConfigClient) UpdateOne(mc *MixerConfig) *MixerConfigUpdateOne {
+	mutation := newMixerConfigMutation(c.config, OpUpdateOne, withMixerConfig(mc))
+	return &MixerConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MixerConfigClient) UpdateOneID(id int) *MixerConfigUpdateOne {
+	mutation := newMixerConfigMutation(c.config, OpUpdateOne, withMixerConfigID(id))
+	return &MixerConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MixerConfig.
+func (c *MixerConfigClient) Delete() *MixerConfigDelete {
+	mutation := newMixerConfigMutation(c.config, OpDelete)
+	return &MixerConfigDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MixerConfigClient) DeleteOne(mc *MixerConfig) *MixerConfigDeleteOne {
+	return c.DeleteOneID(mc.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MixerConfigClient) DeleteOneID(id int) *MixerConfigDeleteOne {
+	builder := c.Delete().Where(mixerconfig.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MixerConfigDeleteOne{builder}
+}
+
+// Query returns a query builder for MixerConfig.
+func (c *MixerConfigClient) Query() *MixerConfigQuery {
+	return &MixerConfigQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a MixerConfig entity by its id.
+func (c *MixerConfigClient) Get(ctx context.Context, id int) (*MixerConfig, error) {
+	return c.Query().Where(mixerconfig.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MixerConfigClient) GetX(ctx context.Context, id int) *MixerConfig {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MixerConfigClient) Hooks() []Hook {
+	return c.hooks.MixerConfig
+}
+
+// OrderClient is a client for the Order schema.
+type OrderClient struct {
+	config
+}
+
+// NewOrderClient returns a client for the Order from the given config.
+func NewOrderClient(c config) *OrderClient {
+	return &OrderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `order.Hooks(f(g(h())))`.
+func (c *OrderClient) Use(hooks ...Hook) {
+	c.hooks.Order = append(c.hooks.Order, hooks...)
+}
+
+// Create returns a create builder for Order.
+func (c *OrderClient) Create() *OrderCreate {
+	mutation := newOrderMutation(c.config, OpCreate)
+	return &OrderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Order entities.
+func (c *OrderClient) CreateBulk(builders ...*OrderCreate) *OrderCreateBulk {
+	return &OrderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Order.
+func (c *OrderClient) Update() *OrderUpdate {
+	mutation := newOrderMutation(c.config, OpUpdate)
+	return &OrderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OrderClient) UpdateOne(o *Order) *OrderUpdateOne {
+	mutation := newOrderMutation(c.config, OpUpdateOne, withOrder(o))
+	return &OrderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OrderClient) UpdateOneID(id int) *OrderUpdateOne {
+	mutation := newOrderMutation(c.config, OpUpdateOne, withOrderID(id))
+	return &OrderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Order.
+func (c *OrderClient) Delete() *OrderDelete {
+	mutation := newOrderMutation(c.config, OpDelete)
+	return &OrderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *OrderClient) DeleteOne(o *Order) *OrderDeleteOne {
+	return c.DeleteOneID(o.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *OrderClient) DeleteOneID(id int) *OrderDeleteOne {
+	builder := c.Delete().Where(order.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OrderDeleteOne{builder}
+}
+
+// Query returns a query builder for Order.
+func (c *OrderClient) Query() *OrderQuery {
+	return &OrderQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Order entity by its id.
+func (c *OrderClient) Get(ctx context.Context, id int) (*Order, error) {
+	return c.Query().Where(order.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OrderClient) GetX(ctx context.Context, id int) *Order {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OrderClient) Hooks() []Hook {
+	return c.hooks.Order
+}
+
+// RecipeClient is a client for the Recipe schema.
+type RecipeClient struct {
+	config
+}
+
+// NewRecipeClient returns a client for the Recipe from the given config.
+func NewRecipeClient(c config) *RecipeClient {
+	return &RecipeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `recipe.Hooks(f(g(h())))`.
+func (c *RecipeClient) Use(hooks ...Hook) {
+	c.hooks.Recipe = append(c.hooks.Recipe, hooks...)
+}
+
+// Create returns a create builder for Recipe.
+func (c *RecipeClient) Create() *RecipeCreate {
+	mutation := newRecipeMutation(c.config, OpCreate)
+	return &RecipeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Recipe entities.
+func (c *RecipeClient) CreateBulk(builders ...*RecipeCreate) *RecipeCreateBulk {
+	return &RecipeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Recipe.
+func (c *RecipeClient) Update() *RecipeUpdate {
+	mutation := newRecipeMutation(c.config, OpUpdate)
+	return &RecipeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RecipeClient) UpdateOne(r *Recipe) *RecipeUpdateOne {
+	mutation := newRecipeMutation(c.config, OpUpdateOne, withRecipe(r))
+	return &RecipeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RecipeClient) UpdateOneID(id int) *RecipeUpdateOne {
+	mutation := newRecipeMutation(c.config, OpUpdateOne, withRecipeID(id))
+	return &RecipeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Recipe.
+func (c *RecipeClient) Delete() *RecipeDelete {
+	mutation := newRecipeMutation(c.config, OpDelete)
+	return &RecipeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *RecipeClient) DeleteOne(r *Recipe) *RecipeDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *RecipeClient) DeleteOneID(id int) *RecipeDeleteOne {
+	builder := c.Delete().Where(recipe.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RecipeDeleteOne{builder}
+}
+
+// Query returns a query builder for Recipe.
+func (c *RecipeClient) Query() *RecipeQuery {
+	return &RecipeQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Recipe entity by its id.
+func (c *RecipeClient) Get(ctx context.Context, id int) (*Recipe, error) {
+	return c.Query().Where(recipe.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RecipeClient) GetX(ctx context.Context, id int) *Recipe {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *RecipeClient) Hooks() []Hook {
+	return c.hooks.Recipe
+}
+
+// RecipeIngredientClient is a client for the RecipeIngredient schema.
+type RecipeIngredientClient struct {
+	config
+}
+
+// NewRecipeIngredientClient returns a client for the RecipeIngredient from the given config.
+func NewRecipeIngredientClient(c config) *RecipeIngredientClient {
+	return &RecipeIngredientClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `recipeingredient.Hooks(f(g(h())))`.
+func (c *RecipeIngredientClient) Use(hooks ...Hook) {
+	c.hooks.RecipeIngredient = append(c.hooks.RecipeIngredient, hooks...)
+}
+
+// Create returns a create builder for RecipeIngredient.
+func (c *RecipeIngredientClient) Create() *RecipeIngredientCreate {
+	mutation := newRecipeIngredientMutation(c.config, OpCreate)
+	return &RecipeIngredientCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RecipeIngredient entities.
+func (c *RecipeIngredientClient) CreateBulk(builders ...*RecipeIngredientCreate) *RecipeIngredientCreateBulk {
+	return &RecipeIngredientCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RecipeIngredient.
+func (c *RecipeIngredientClient) Update() *RecipeIngredientUpdate {
+	mutation := newRecipeIngredientMutation(c.config, OpUpdate)
+	return &RecipeIngredientUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RecipeIngredientClient) UpdateOne(ri *RecipeIngredient) *RecipeIngredientUpdateOne {
+	mutation := newRecipeIngredientMutation(c.config, OpUpdateOne, withRecipeIngredient(ri))
+	return &RecipeIngredientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RecipeIngredientClient) UpdateOneID(id int) *RecipeIngredientUpdateOne {
+	mutation := newRecipeIngredientMutation(c.config, OpUpdateOne, withRecipeIngredientID(id))
+	return &RecipeIngredientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RecipeIngredient.
+func (c *RecipeIngredientClient) Delete() *RecipeIngredientDelete {
+	mutation := newRecipeIngredientMutation(c.config, OpDelete)
+	return &RecipeIngredientDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *RecipeIngredientClient) DeleteOne(ri *RecipeIngredient) *RecipeIngredientDeleteOne {
+	return c.DeleteOneID(ri.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *RecipeIngredientClient) DeleteOneID(id int) *RecipeIngredientDeleteOne {
+	builder := c.Delete().Where(recipeingredient.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RecipeIngredientDeleteOne{builder}
+}
+
+// Query returns a query builder for RecipeIngredient.
+func (c *RecipeIngredientClient) Query() *RecipeIngredientQuery {
+	return &RecipeIngredientQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a RecipeIngredient entity by its id.
+func (c *RecipeIngredientClient) Get(ctx context.Context, id int) (*RecipeIngredient, error) {
+	return c.Query().Where(recipeingredient.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RecipeIngredientClient) GetX(ctx context.Context, id int) *RecipeIngredient {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *RecipeIngredientClient) Hooks() []Hook {
+	return c.hooks.RecipeIngredient
 }
 
 // TodoClient is a client for the Todo schema.

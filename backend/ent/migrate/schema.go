@@ -8,6 +8,68 @@ import (
 )
 
 var (
+	// IngredientsColumns holds the columns for the "ingredients" table.
+	IngredientsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// IngredientsTable holds the schema information for the "ingredients" table.
+	IngredientsTable = &schema.Table{
+		Name:       "ingredients",
+		Columns:    IngredientsColumns,
+		PrimaryKey: []*schema.Column{IngredientsColumns[0]},
+	}
+	// MixersColumns holds the columns for the "mixers" table.
+	MixersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// MixersTable holds the schema information for the "mixers" table.
+	MixersTable = &schema.Table{
+		Name:       "mixers",
+		Columns:    MixersColumns,
+		PrimaryKey: []*schema.Column{MixersColumns[0]},
+	}
+	// MixerConfigsColumns holds the columns for the "mixer_configs" table.
+	MixerConfigsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// MixerConfigsTable holds the schema information for the "mixer_configs" table.
+	MixerConfigsTable = &schema.Table{
+		Name:       "mixer_configs",
+		Columns:    MixerConfigsColumns,
+		PrimaryKey: []*schema.Column{MixerConfigsColumns[0]},
+	}
+	// OrdersColumns holds the columns for the "orders" table.
+	OrdersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"ORDERED", "IN_PROGRESS", "COMPLETED"}, Default: "ORDERED"},
+	}
+	// OrdersTable holds the schema information for the "orders" table.
+	OrdersTable = &schema.Table{
+		Name:       "orders",
+		Columns:    OrdersColumns,
+		PrimaryKey: []*schema.Column{OrdersColumns[0]},
+	}
+	// RecipesColumns holds the columns for the "recipes" table.
+	RecipesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// RecipesTable holds the schema information for the "recipes" table.
+	RecipesTable = &schema.Table{
+		Name:       "recipes",
+		Columns:    RecipesColumns,
+		PrimaryKey: []*schema.Column{RecipesColumns[0]},
+	}
+	// RecipeIngredientsColumns holds the columns for the "recipe_ingredients" table.
+	RecipeIngredientsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// RecipeIngredientsTable holds the schema information for the "recipe_ingredients" table.
+	RecipeIngredientsTable = &schema.Table{
+		Name:       "recipe_ingredients",
+		Columns:    RecipeIngredientsColumns,
+		PrimaryKey: []*schema.Column{RecipeIngredientsColumns[0]},
+	}
 	// TodosColumns holds the columns for the "todos" table.
 	TodosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -20,6 +82,12 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		IngredientsTable,
+		MixersTable,
+		MixerConfigsTable,
+		OrdersTable,
+		RecipesTable,
+		RecipeIngredientsTable,
 		TodosTable,
 	}
 )

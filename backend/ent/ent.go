@@ -3,6 +3,12 @@
 package ent
 
 import (
+	"boschtail/ent/ingredient"
+	"boschtail/ent/mixer"
+	"boschtail/ent/mixerconfig"
+	"boschtail/ent/order"
+	"boschtail/ent/recipe"
+	"boschtail/ent/recipeingredient"
 	"boschtail/ent/todo"
 	"errors"
 	"fmt"
@@ -29,7 +35,13 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		todo.Table: todo.ValidColumn,
+		ingredient.Table:       ingredient.ValidColumn,
+		mixer.Table:            mixer.ValidColumn,
+		mixerconfig.Table:      mixerconfig.ValidColumn,
+		order.Table:            order.ValidColumn,
+		recipe.Table:           recipe.ValidColumn,
+		recipeingredient.Table: recipeingredient.ValidColumn,
+		todo.Table:             todo.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
