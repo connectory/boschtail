@@ -17,6 +17,13 @@ classDiagram
     Order --> Recipe
     Order --o "*" RecipeIngredient
     RecipeIngredient --o "1" Ingredient
+
+    Mixer : +int id
+    MixerConfig : +int id
+    Order : +int id
+    Recipe : +int id
+    RecipeIngredient: +int id
+    Ingredient: +int id
 ```
 
 mixer
