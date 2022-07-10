@@ -9,12 +9,12 @@ generated with [ent](https://entgo.io/)
 
 ```mermaid
 classDiagram
-    Mixer --o "1" MixerConfig : hasA
-    MixerConfig --o "1..*" Ingredient : configuredWith
+    Mixer o-- "1" MixerConfig : hasA
+    MixerConfig o-- "1..*" Ingredient : configuredWith
     Order --> Mixer : refersTo
     Order --> Recipe : refersTo
-    Recipe --o "1..*" RecipeIngredient : hasMany
-    RecipeIngredient --o "1" Ingredient
+    Recipe *-- "1..*" RecipeIngredient : hasMany
+    RecipeIngredient o-- "1" Ingredient
 
     Mixer : +int id
     MixerConfig : +int id
