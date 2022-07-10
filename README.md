@@ -12,10 +12,11 @@ better write proper datamodel, e.g. in [mermaid](https://mermaid-js.github.io/me
 
 ```mermaid
 classDiagram
-    Mixer --o "1" MixerConfig
+    Mixer --o "1" MixerConfig : hasA
+    MixerConfig --o "*" Ingredient
     Order --> Mixer
     Order --> Recipe
-    Order --o "*" RecipeIngredient
+    Recipe --o "*" RecipeIngredient
     RecipeIngredient --o "1" Ingredient
 
     Mixer : +int id
