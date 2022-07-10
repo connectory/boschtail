@@ -13,18 +13,21 @@ better write proper datamodel, e.g. in [mermaid](https://mermaid-js.github.io/me
 ```mermaid
 classDiagram
     Mixer --o "1" MixerConfig : hasA
-    MixerConfig --o "*" Ingredient
-    Order --> Mixer
-    Order --> Recipe
-    Recipe --o "*" RecipeIngredient
+    MixerConfig --o "1..*" Ingredient : configuredWith
+    Order --> Mixer : refersTo
+    Order --> Recipe : refersTo
+    Recipe --o "1..*" RecipeIngredient : hasMany
     RecipeIngredient --o "1" Ingredient
 
     Mixer : +int id
     MixerConfig : +int id
     Order : +int id
     Recipe : +int id
+    Recipe : +int name
     RecipeIngredient: +int id
+    RecipeIngredient: +int amount
     Ingredient: +int id
+    Ingredient: +String name
 ```
 
 mixer
